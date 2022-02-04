@@ -20,11 +20,6 @@ AVAILABLE_EMOTIONS = {
 
 
 def get_label(audio_config):
-    """Returns label corresponding to which features are to be extracted
-        e.g:
-    audio_config = {'mfcc': True, 'chroma': True, 'contrast': False, 'tonnetz': False, 'mel': False}
-    get_label(audio_config): 'mfcc-chroma'
-    """
     features = ["mfcc", "chroma", "mel", "contrast", "tonnetz"]
     label = ""
     for feature in features:
@@ -55,8 +50,6 @@ def extract_feature(file_name, **kwargs):
         with soundfile.SoundFile(file_name) as sound_file:
             pass
     except RuntimeError:
-        # not properly formated, convert to 16000 sample rate & mono channel using ffmpeg
-        # get the basename
         basename = os.path.basename(file_name)
         dirname  = os.path.dirname(file_name)
         name, ext = os.path.splitext(basename)

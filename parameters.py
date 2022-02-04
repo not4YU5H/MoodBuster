@@ -46,11 +46,6 @@ classification_grid_parameters = {
 }
 
 regression_grid_parameters = {
-    # SVR():  {
-    #     'C': [0.0005, 0.001, 0.002, 0.01, 0.1, 1, 10],
-    #     'gamma' : [0.001, 0.01, 0.1, 1],
-    #     'kernel': ['rbf', 'poly', 'sigmoid']
-    # },
     RandomForestRegressor():   {
         'n_estimators': [10, 40, 70, 100],
         'max_depth': [3, 5, 7],

@@ -19,33 +19,7 @@ import pandas as pd
 
 
 class EmotionRecognizer:
-    """A class for training, testing and predicting emotions based on
-    speech's features that are extracted and fed into `sklearn` or `keras` model"""
     def __init__(self, model=None, **kwargs):
-        """
-        Params:
-            model (sklearn model): the model used to detect emotions. If `model` is None, then self.determine_best_model()
-                will be automatically called
-            emotions (list): list of emotions to be used. Note that these emotions must be available in
-                RAVDESS_TESS & EMODB Datasets, available nine emotions are the following:
-                    'neutral', 'calm', 'happy', 'sad', 'angry', 'fear', 'disgust', 'ps' ( pleasant surprised ), 'boredom'.
-                Default is ["sad", "neutral", "happy"].
-            tess_ravdess (bool): whether to use TESS & RAVDESS Speech datasets, default is True
-            emodb (bool): whether to use EMO-DB Speech dataset, default is True,
-            custom_db (bool): whether to use custom Speech dataset that is located in `data/train-custom`
-                and `data/test-custom`, default is True
-            tess_ravdess_name (str): the name of the output CSV file for TESS&RAVDESS dataset, default is "tess_ravdess.csv"
-            emodb_name (str): the name of the output CSV file for EMO-DB dataset, default is "emodb.csv"
-            custom_db_name (str): the name of the output CSV file for the custom dataset, default is "custom.csv"
-            features (list): list of speech features to use, default is ["mfcc", "chroma", "mel"]
-                (i.e MFCC, Chroma and MEL spectrogram )
-            classification (bool): whether to use classification or regression, default is True
-            balance (bool): whether to balance the dataset ( both training and testing ), default is True
-            verbose (bool/int): whether to print messages on certain tasks, default is 1
-        Note that when `tess_ravdess`, `emodb` and `custom_db` are set to `False`, `tess_ravdess` will be set to True
-        automatically.
-        """
-        # emotions
         self.emotions = kwargs.get("emotions", ["sad", "neutral", "happy"])
         # make sure that there are only available emotions
         self._verify_emotions()
@@ -71,27 +45,18 @@ class EmotionRecognizer:
 
         self.verbose = kwargs.get("verbose", 1)
 
-        # set metadata path file names
         self._set_metadata_filenames()
-        # write csv's anyway
         self.write_csv()
 
-        # boolean attributes
         self.data_loaded = False
         self.model_trained = False
 
-        # model
         if not model:
             self.determine_best_model()
         else:
             self.model = model
 
     def _set_metadata_filenames(self):
-        """
-        Protected method to get all CSV (metadata) filenames into two instance attributes:
-        - `self.train_desc_files` for training CSVs
-        - `self.test_desc_files` for testing CSVs
-        """
         train_desc_files, test_desc_files = [], []
         if self.tess_ravdess:
             train_desc_files.append(f"train_{self.tess_ravdess_name}")
@@ -103,30 +68,20 @@ class EmotionRecognizer:
             train_desc_files.append(f"train_{self.custom_db_name}")
             test_desc_files.append(f"test_{self.custom_db_name}")
 
-        # set them to be object attributes
         self.train_desc_files = train_desc_files
         self.test_desc_files  = test_desc_files
 
     def _verify_emotions(self):
-        """
-        This method makes sure that emotions passed in parameters are valid.
-        """
-        for emotion in self.emotions:
+         for emotion in self.emotions:
             assert emotion in AVAILABLE_EMOTIONS, "Emotion not recognized."
 
     def get_best_estimators(self):
-        """Loads estimators from grid files and returns them"""
         return get_best_estimators(self.classification)
 
     def write_csv(self):
-        """
-        Write available CSV files in `self.train_desc_files` and `self.test_desc_files`
-        determined by `self._set_metadata_filenames()` method.
-        """
-        for train_csv_file, test_csv_file in zip(self.train_desc_files, self.test_desc_files):
-            # not safe approach
+          for train_csv_file, test_csv_file in zip(self.train_desc_files, self.test_desc_files):
             if os.path.isfile(train_csv_file) and os.path.isfile(test_csv_file):
-                # file already exists, just skip writing csv files
+ 
                 if not self.override_csv:
                     continue
             if self.emodb_name in train_csv_file:
@@ -159,11 +114,7 @@ class EmotionRecognizer:
             self.data_loaded = True
 
     def train(self, verbose=1):
-        """
-        Train the model, if data isn't loaded, it 'll be loaded automatically
-        """
         if not self.data_loaded:
-            # if data isn't loaded yet, load it then
             self.load_data()
         if not self.model_trained:
             self.model.fit(X=self.X_train, y=self.y_train)
@@ -201,7 +152,7 @@ class EmotionRecognizer:
         if not self.data_loaded:
             self.load_data()
         
-        # loads estimators
+
         estimators = self.get_best_estimators()
 
         result = []
@@ -272,8 +223,7 @@ class EmotionRecognizer:
         if percentage:
             for i in range(len(matrix)):
                 matrix[i] = matrix[i] / np.sum(matrix[i])
-            # make it percentage
-            matrix *= 100
+                matrix *= 100
         if labeled:
             matrix = pd.DataFrame(matrix, index=[ f"true_{e}" for e in self.emotions ],
                                     columns=[ f"predicted_{e}" for e in self.emotions ])
@@ -282,7 +232,6 @@ class EmotionRecognizer:
     def draw_confusion_matrix(self):
       
         matrix = self.confusion_matrix(percentage=False, labeled=False)
-        #TODO: add labels, title, legends, etc.
         pl.imshow(matrix, cmap="binary")
         pl.show()
 
@@ -408,38 +357,38 @@ def visualize(results, n_classes):
                 ax[j//3, j%3].set_xticklabels(["1%", "10%", "100%"])
                 ax[j//3, j%3].set_xlabel("Training Set Size")
                 ax[j//3, j%3].set_xlim((-0.2, x*3))
-    # Add unique y-labels
+
     ax[0, 0].set_ylabel("Time (in seconds)")
     ax[0, 1].set_ylabel("Accuracy Score")
     ax[0, 2].set_ylabel("F-score")
     ax[1, 0].set_ylabel("Time (in seconds)")
     ax[1, 1].set_ylabel("Accuracy Score")
     ax[1, 2].set_ylabel("F-score")
-    # Add titles
+
     ax[0, 0].set_title("Model Training")
     ax[0, 1].set_title("Accuracy Score on Training Subset")
     ax[0, 2].set_title("F-score on Training Subset")
     ax[1, 0].set_title("Model Predicting")
     ax[1, 1].set_title("Accuracy Score on Testing Set")
     ax[1, 2].set_title("F-score on Testing Set")
-    # Add horizontal lines for naive predictors
+
     ax[0, 1].axhline(y = accuracy, xmin = -0.1, xmax = 3.0, linewidth = 1, color = 'k', linestyle = 'dashed')
     ax[1, 1].axhline(y = accuracy, xmin = -0.1, xmax = 3.0, linewidth = 1, color = 'k', linestyle = 'dashed')
     ax[0, 2].axhline(y = f1, xmin = -0.1, xmax = 3.0, linewidth = 1, color = 'k', linestyle = 'dashed')
     ax[1, 2].axhline(y = f1, xmin = -0.1, xmax = 3.0, linewidth = 1, color = 'k', linestyle = 'dashed')
-    # Set y-limits for score panels
+
     ax[0, 1].set_ylim((0, 1))
     ax[0, 2].set_ylim((0, 1))
     ax[1, 1].set_ylim((0, 1))
     ax[1, 2].set_ylim((0, 1))
-    # Set additional plots invisibles
+
     ax[0, 3].set_visible(False)
     ax[1, 3].axis('off')
-    # Create legend
+
     for i, learner in enumerate(results.keys()):
         pl.bar(0, 0, color=colors[i], label=learner)
     pl.legend()
-    # Aesthetics
+
     pl.suptitle("Performance Metrics for Three Supervised Learning Models", fontsize = 16, y = 1.10)
     pl.tight_layout()
     pl.show()
