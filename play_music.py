@@ -30,11 +30,9 @@ def on_music(ch):
         print("No song played")
 
     if choice!=0:
-            # Get required data from JSON response.
             tracks_dict = searchResults['tracks']
             tracks_items = tracks_dict['items']
             song = tracks_items[0]['external_urls']['spotify']
-            # Open the Song in Web Browser
             webbrowser.open(song)
             print('Song has opened in your browser.')
 

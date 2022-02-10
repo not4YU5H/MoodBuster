@@ -1,4 +1,3 @@
-
 import pickle
 
 from emotion_recognition import EmotionRecognizer

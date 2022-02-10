@@ -12,6 +12,9 @@ from utils import get_best_estimators
 
 import play_music as pm
 
+import warnings
+warnings.filterwarnings('ignore') 
+
 THRESHOLD = 500
 CHUNK_SIZE = 1024
 FORMAT = pyaudio.paInt16
@@ -159,10 +162,15 @@ if __name__ == "__main__":
     
     record_to_file()
     result = detector.predict("output10.wav")
-    print(result)
-    if result=="sad":
-        pm.on_music(1)
-    elif result=="neutral":
-        pm.on_music(2)
-    elif result=="happy":
-        pm.on_music(3)
+    print("You seem to be " + result)
+    
+    yn=input("Would like to listen to a song? (y/n) : ")
+    if yn=='y':
+        if result=="sad":
+            pm.on_music(1)
+        elif result=="neutral":
+            pm.on_music(2)
+        elif result=="happy":
+            pm.on_music(3)
+    else :
+        print("Have a great day!")

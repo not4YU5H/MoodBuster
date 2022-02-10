@@ -1,10 +1,3 @@
-
-
-"""
-A utility script used for converting audio samples to be 
-suitable for feature extraction
-"""
-
 import os
 
 def convert_audio(audio_path, target_path, remove=False):
